@@ -34,8 +34,8 @@ public:
     TurboEditor(Args&&... args) noexcept :
         super(static_cast<Args&&>(args)...)
     {
-        if (language)
-            lineNumbers.setState(true);
+        // if (language)
+        //     lineNumbers.setState(true);
         wrapping.setState(true, scintilla, [] (...) { return false; });
     }
 

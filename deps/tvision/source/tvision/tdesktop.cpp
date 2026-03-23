@@ -35,7 +35,7 @@ TDeskTop::TDeskTop( const TRect& bounds ) noexcept :
     TGroup(bounds)
 {
     growMode = gfGrowHiX | gfGrowHiY;
-    tileColumnsFirst = False;
+    tileColumnsFirst = true;
 
     if( createBackground != 0 && (background = createBackground( getExtent() )) != 0 )
         insert( background );
@@ -203,6 +203,37 @@ TRect calcTileRect( short pos, const TRect &r )
     return nRect;
 }
 
+TRect calcTileRect_NEW( short pos, const TRect &r )
+{
+    short x, y;
+    TRect nRect;
+
+    short d = (numRows - leftOver) * numCols;
+    if( pos <  d )
+        {
+        y = pos / numCols;
+        x = pos % numCols;
+        }
+    else
+        {
+        y = (pos-d)/(numCols+1) + (numRows-leftOver);
+        x = (pos-d)%(numCols+1);
+        }
+    nRect.a.y = dividerLoc( r.a.y, r.b.y, numRows, y );
+    nRect.b.y = dividerLoc( r.a.y, r.b.y, numRows, y+1 );
+    if( pos >= d )
+        {
+        nRect.a.x = dividerLoc(r.a.x, r.b.x, numCols+1, x);
+        nRect.b.x = dividerLoc(r.a.x, r.b.x, numCols+1, x+1);
+        }
+    else
+        {
+        nRect.a.x = dividerLoc(r.a.x, r.b.x, numCols, x);
+        nRect.b.x = dividerLoc(r.a.x, r.b.x, numCols, x+1);
+        }
+    return nRect;
+}
+
 void doTile( TView* p, void *lR )
 {
     if( Tileable( p ) )
@@ -211,7 +242,7 @@ void doTile( TView* p, void *lR )
         p->locate(r);
         tileNum--;
         }
-}
+} 
 
 void TDeskTop::tile( const TRect& r )
 {
