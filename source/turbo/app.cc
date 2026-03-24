@@ -16,6 +16,7 @@
 #define Uses_TScreen
 #define Uses_TButton
 #include <tvision/tv.h>
+#include <filesystem>
 
 #include "app.h"
 #include "help.h"
@@ -264,7 +265,24 @@ void TurboApp::parseArgs()
         for (int i = 1; i < argc; ++i) {
             current->setText("%s", argv[i]);
             TScreen::flushScreen();
-            fileOpenOrNew(argv[i]);
+			
+			namespace fs = std::filesystem;
+
+			if(fs::is_directory(argv[i]))
+			{
+				for(const auto& entry : fs::directory_iterator(argv[i]))
+				{
+					if(fs::is_regular_file(entry.path()))
+					{
+						auto p = entry.path();
+						auto pathString = p.string();
+						const char* cstr = pathString.c_str();
+						fileOpenOrNew(cstr);
+					}
+				}
+			} else {
+				fileOpenOrNew(argv[i]);
+			}
         }
         remove(w);
         TObject::destroy(w);
