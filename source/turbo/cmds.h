@@ -27,6 +27,8 @@ enum : ushort
     cmReplaceAll,
     // Commands that cannot be disabled.
     cmToggleTree = 1000,
+    cmToggleFolderTree,
+	cmFolderTreeClick,
     cmStateChanged,
     cmFindFindBox,
     cmFindGoToLineBox,

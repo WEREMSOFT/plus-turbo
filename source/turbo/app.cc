@@ -25,6 +25,7 @@
 #include "widgets.h"
 #include "listviews.h"
 #include "doctree.h"
+#include "foldertree.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 
@@ -99,6 +100,28 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
         if (deskTop->size.x - docTree->size.x < 82)
             docTree->hide();
     }
+
+
+    // Create the folder tree view
+    {
+        TRect r = deskTop->getExtent();
+        // Try to make it between 22 and 30 columns wide, and try to leave
+        // at least 82 empty columns on screen (so that an editor view is
+        // at least ~80 columns by default).
+        if (r.b.x > 22)
+            r.a.x = r.b.x - min(max(r.b.x - 82, 22), 30);
+        folderTree = new FolderTreeWindow(r, &folderTree);
+        folderTree->flags &= ~wfZoom;
+        // The grow mode assumes it's placed on the right side of the screen.
+        // Greater flexibility would require some trick or a dedicated class
+        // for side views.
+        folderTree->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY;
+        folderTree->setState(sfShadow, False);
+        deskTop->insert(folderTree);
+        // Show by default only on large terminals.
+        if (deskTop->size.x - folderTree->size.x < 82)
+            folderTree->hide();
+    }
 }
 
 TMenuBar *TurboApp::initMenuBar(TRect r)
@@ -152,6 +175,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
             *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "Toggle Document ~F~older Tree View", cmToggleFolderTree, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~H~elp", kbAltH ) +
             *new TMenuItem( "~K~eyboard shortcurs", cmHelp, kbF1, hcNoContext, "F1" ) +
             newLine() +
@@ -228,6 +252,7 @@ void TurboApp::handleEvent(TEvent &event)
                 break;
             case cmCloseAll: closeAll(); break;
             case cmToggleTree: toggleTreeView(); break;
+            case cmToggleFolderTree: toggleFolderView(); break;
             case cmTreeNext:
                 if (docTree)
                     docTree->tree->focusNext();
@@ -242,6 +267,14 @@ void TurboApp::handleEvent(TEvent &event)
             case cmHelp:
                 TurboHelp::showOrFocusHelpWindow(*deskTop);
                 break;
+			case cmFolderTreeClick:
+				{
+					EditorWindow* editorWindow;
+					fileOpenOrNew((char *)event.message.infoPtr, &editorWindow);
+					auto node = folderTree->tree->getDirNode((char *)event.message.infoPtr);
+					node->data = editorWindow;
+					break;
+				}
             default:
                 handled = false;
                 break;
@@ -276,8 +309,7 @@ void TurboApp::parseArgs()
 					{
 						auto p = entry.path();
 						auto pathString = p.string();
-						const char* cstr = pathString.c_str();
-						fileOpenOrNew(cstr);
+						folderTree->tree->addFileNode(pathString);
 					}
 				}
 			} else {
@@ -312,6 +344,16 @@ void TurboApp::fileOpenOrNew(const char *path)
     auto &scintilla = createScintilla();
     if (turbo::readFile(scintilla, abspath, turbo::acceptMissingFilesOnOpen))
         addEditor(scintilla, abspath);
+}
+
+void TurboApp::fileOpenOrNew(const char *path, EditorWindow** editorWindow)
+{
+    char abspath[MAXPATH];
+    strnzcpy(abspath, path, MAXPATH);
+    fexpand(abspath);
+    auto &scintilla = createScintilla();
+    if (turbo::readFile(scintilla, abspath, turbo::acceptMissingFilesOnOpen))
+        addEditor(scintilla, abspath, editorWindow);
 }
 
 void TurboApp::closeAll()
@@ -363,6 +405,21 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
     enableCommands(editorCmds);
 }
 
+void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path, EditorWindow** editorWindow)
+// Pre: 'path' is an absolute path.
+{
+    TRect r = newEditorBounds();
+    auto &counter = fileCount[TPath::basename(path)];
+    auto &editor = *new TurboEditor(scintilla, path);
+    EditorWindow &w = *new EditorWindow(r, editor, counter, searchSettings, *this);
+    if (docTree)
+        docTree->tree->addEditor(&w);
+    w.listHead.insert_after(&MRUlist);
+    deskTop->insert(&w);
+    enableCommands(editorCmds);
+	*editorWindow = &w;
+}
+
 void TurboApp::showEditorList(TEvent *ev)
 {
     EditorListModel model {MRUlist};
@@ -379,6 +436,43 @@ void TurboApp::showEditorList(TEvent *ev)
             wnd->focus();
 
     destroy(lw);
+}
+
+void TurboApp::toggleFolderView()
+{
+    if (!folderTree)
+        return;
+    // Prevent editors from doing draw() on each changeBounds(). We'll draw all
+    // the views at the end.
+    MRUlist.forEach([&] (auto *win) {
+        win->setState(sfExposed, False);
+    });
+    TRect dr = folderTree->getBounds();
+    if (folderTree->state & sfVisible) {
+        folderTree->hide();
+        MRUlist.forEach([this, dr] (auto *win) {
+            TRect r = win->getBounds();
+            if (r.a.x >= dr.b.x)
+                r.a.x -= folderTree->size.x;
+            else if (r.b.x <= dr.a.x)
+                r.b.x += folderTree->size.x;
+            win->locate(r);
+        });
+    } else {
+        MRUlist.forEach([this, dr] (auto *win) {
+            TRect r = win->getBounds();
+            if (r.a.x + folderTree->size.x >= dr.b.x)
+                r.a.x += folderTree->size.x;
+            else if (r.b.x - folderTree->size.x <= dr.a.x)
+                r.b.x -= folderTree->size.x;
+            win->locate(r);
+        });
+        folderTree->show();
+    }
+    MRUlist.forEach([&] (auto *win) {
+        win->setState(sfExposed, True);
+    });
+    deskTop->redraw();
 }
 
 void TurboApp::toggleTreeView()
@@ -453,6 +547,8 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
         disableCommands(editorCmds);
     if (docTree)
     {
+		folderTree->tree->focusEditor(&w);
+		folderTree->tree->removeEditor(&w);
         docTree->tree->removeEditor(&w);
         // Removing the editor causes the focus to stay on the same position
         // but maybe not on the right element.

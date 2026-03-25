@@ -7,6 +7,7 @@
 
 #include <turbo/editstates.h>
 #include "doctree.h"
+#include "foldertree.h"
 #include "apputils.h"
 #include "editwindow.h"
 #include "cmds.h"
@@ -21,6 +22,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     list_head<EditorWindow> MRUlist;
     TClockView *clock;
     DocumentTreeWindow *docTree;
+    FolderTreeWindow *folderTree;
     TCommandSet editorCmds;
     bool argsParsed {false};
     int argc;
@@ -41,12 +43,15 @@ struct TurboApp : public TApplication, EditorWindowParent
     void fileNew();
     void fileOpen();
     void fileOpenOrNew(const char *path);
+	void fileOpenOrNew(const char *path, EditorWindow** editorWindow);
     void closeAll();
     TRect newEditorBounds() const;
     turbo::TScintilla &createScintilla() noexcept;
     void addEditor(turbo::TScintilla &, const char *path);
+    void addEditor(turbo::TScintilla &, const char *path, EditorWindow** w);
     void showEditorList(TEvent *ev);
     void toggleTreeView();
+    void toggleFolderView();
 
     void handleFocus(EditorWindow &w) noexcept override;
     void handleTitleChange(EditorWindow &w) noexcept override;
