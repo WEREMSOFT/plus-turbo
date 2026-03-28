@@ -118,7 +118,7 @@ void FolderTreeView::focused(int i) noexcept
 				namespace fs = std::filesystem;
 				if(node->fullPath != NULL && fs::is_regular_file(node->fullPath))
 				{
-					message(TProgram::application, evCommand, 	cmFolderTreeClick, (void *)node->fullPath.c_str());
+					message(TProgram::application, evCommand, 	cmFolderTreeClick, (void *)node);
 				}
 			}
 		}

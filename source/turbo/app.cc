@@ -28,6 +28,7 @@
 #include "foldertree.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
+#include <variant>
 
 using namespace Scintilla;
 
@@ -269,10 +270,16 @@ void TurboApp::handleEvent(TEvent &event)
                 break;
 			case cmFolderTreeClick:
 				{
-					EditorWindow* editorWindow;
-					fileOpenOrNew((char *)event.message.infoPtr, &editorWindow);
-					auto node = folderTree->tree->getDirNode((char *)event.message.infoPtr);
-					node->data = editorWindow;
+					EditorWindow *editorWindowPtr;
+					using FolderNode = FolderTreeView::FolderNode;
+					auto node = (FolderNode*)event.message.infoPtr;
+					auto ed = node->getEditor();
+
+					if(ed == nullptr)
+					{
+						fileOpenOrNew(node->fullPath.c_str(), &editorWindowPtr);
+						node->data = editorWindowPtr;
+					}
 					break;
 				}
             default:
