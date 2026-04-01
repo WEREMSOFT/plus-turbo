@@ -288,3 +288,62 @@ void FolderTreeWindow::close()
 {
     message(TProgram::application, evCommand, cmToggleFolderTree, 0);
 }
+
+void FolderTreeView::deleteSubtree(TNode *node) noexcept
+{
+    while (node)
+    {
+        auto *next = node->next;
+
+        if (node->childList)
+            deleteSubtree(node->childList);
+
+        delete node;
+
+        node = next;
+    }
+}
+
+void FolderTreeView::reset() noexcept
+{
+    deleteSubtree(root);
+    root = nullptr;
+    foc = 0;        // reset focus (optional but recommended)
+    update();
+    drawView();
+}
+
+void FolderTreeView::loadFromFolder(const std::string &path) noexcept
+{
+    reset();
+
+    namespace fs = std::filesystem;
+
+    for (const auto &entry : fs::recursive_directory_iterator(path))
+    {
+        addFileNode(entry.path().string());
+    }
+
+    update();
+    drawView();
+}
+
+void FolderTreeView::loadRecursive(const std::string &path) noexcept
+{
+    namespace fs = std::filesystem;
+
+    for (const auto &entry : fs::directory_iterator(path))
+    {
+        const auto &p = entry.path();
+        auto pathString = p.string();
+
+        // Add node (this already creates parent directories via getDirNode)
+        addFileNode(pathString);
+
+        // Recurse into directories
+        if (fs::is_directory(p))
+        {
+            loadRecursive(pathString);
+        }
+    }
+}

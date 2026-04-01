@@ -49,15 +49,18 @@ const ushort
 
 // Standard application commands
 
-    cmNew           = 30,
-    cmOpen          = 31,
-    cmSave          = 32,
-    cmSaveAs        = 33,
-    cmSaveAll       = 34,
-    cmChDir         = 35,
-    cmDosShell      = 36,
-    cmCloseAll      = 37,
-    cmOpenFolder	= 38,
+    cmNew           		= 30,
+    cmOpen          		= 31,
+    cmSave          		= 32,
+    cmSaveAs        		= 33,
+    cmSaveAll       		= 34,
+    cmChDir         		= 35,
+    cmDosShell      		= 36,
+    cmCloseAll      		= 37,
+    cmOpenFolder			= 38,
+    cmNewBasicCProject		= 39,
+    cmNewBasicSDL3CProject	= 40,
+    cmNewBasicGLFWCProject	= 41,
 
 //  TView State masks
 

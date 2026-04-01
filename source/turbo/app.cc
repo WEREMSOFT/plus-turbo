@@ -28,6 +28,7 @@
 #include "listviews.h"
 #include "doctree.h"
 #include "foldertree.h"
+#include "projectcreator.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 #include <variant>
@@ -132,6 +133,10 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 {
     r.b.y = r.a.y+1;
     return new TMenuBar( r,
+        *new TSubMenu( "~P~roject", kbAltP, hcNoContext ) +
+			*new TMenuItem( "~N~ew Basic C Project", cmNewBasicCProject, kbNoKey, hcNoContext ) +
+			*new TMenuItem( "~N~ew Basic SDL3 C Project", cmNewBasicSDL3CProject, kbNoKey, hcNoContext ) +
+			*new TMenuItem( "~N~ew Basic GLFW C Project", cmNewBasicGLFWCProject, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
@@ -287,6 +292,15 @@ void TurboApp::handleEvent(TEvent &event)
 					}
 					break;
 				}
+			case cmNewBasicCProject:
+				NewBasicCProject();
+				break;
+			case cmNewBasicSDL3CProject:
+				NewBasicCProject();
+				break;
+			case cmNewBasicGLFWCProject:
+				NewBasicCProject();
+				break;
             default:
                 handled = false;
                 break;
@@ -313,15 +327,7 @@ void TurboApp::parseArgs()
 			
 			if(fs::is_directory(argv[i]))
 			{
-				for(const auto& entry : fs::directory_iterator(argv[i]))
-				{
-					if(fs::is_regular_file(entry.path()))
-					{
-						auto p = entry.path();
-						auto pathString = p.string();
-						folderTree->tree->addFileNode(pathString);
-					}
-				}
+				folderTree->tree->loadFromFolder(argv[i]);
 			} else {
 				fileOpenOrNew(argv[i]);
 			}
@@ -336,6 +342,24 @@ void TurboApp::fileNew()
     addEditor(createScintilla(), "");
 }
 
+void TurboApp::NewBasicCProject()
+{
+	ProjectCreator::create();
+	folderTree->tree->loadFromFolder(fs::current_path());
+}
+
+void TurboApp::NewBasicSDL3CProject()
+{
+	ProjectCreator::createSDL();
+	folderTree->tree->loadFromFolder(fs::current_path());
+}
+
+void TurboApp::NewBasicGLFWCProject()
+{
+	ProjectCreator::createGLFW();
+	folderTree->tree->loadFromFolder(fs::current_path());
+}
+
 void TurboApp::folderOpen()
 {
 	TView *d = validView( new TChDirDialog( 0, 666 ) );
@@ -347,15 +371,8 @@ void TurboApp::folderOpen()
 		getcwd(path, MAXDIR);
 		if(fs::is_directory(path))
 		{
-			for(const auto& entry : fs::directory_iterator(path))
-			{
-				if(fs::is_regular_file(entry.path()))
-				{
-					auto p = entry.path();
-					auto pathString = p.string();
-					folderTree->tree->addFileNode(pathString);
-				}
-			}
+			folderTree->tree->reset();
+			folderTree->tree->loadFromFolder(path);
 		}
     }
 }

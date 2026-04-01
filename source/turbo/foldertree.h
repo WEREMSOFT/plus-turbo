@@ -39,12 +39,15 @@ struct FolderTreeView : public TOutline {
     void removeEditor(EditorWindow *w) noexcept;
     void focusNext() noexcept;
     void focusPrev() noexcept;
+	void reset() noexcept;
+	void loadFromFolder(const std::string &path) noexcept;
+	void loadRecursive(const std::string &path) noexcept;
+	void deleteSubtree(TNode *node) noexcept;
     FolderNode *getDirNode(std::string_view dirPath) noexcept;
     FolderNode *findByEditor(const EditorWindow *w, int *pos=nullptr) noexcept;
     FolderNode *findByPath(std::string_view path) noexcept;
     template <class Func>
     FolderNode *firstThat(Func &&func) noexcept;
-
 };
 
 template <class Func>
