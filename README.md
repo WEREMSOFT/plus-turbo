@@ -1,3 +1,7 @@
+
+<img width="320" height="240" alt="Sprite-0002" src="https://github.com/user-attachments/assets/7812559b-6882-45ee-bd8b-7a05c2543ac5" />
+
+
 # +Turbo IDE
 
 +Turbo is a fork from the original [Turbo Editor](https://github.com/magiblot/turbo) project. Its a mixture of 3 projects: [TurboVision App framework](https://github.com/magiblot/tvision), [Scintilla](https://www.scintilla.org/index.html) (for sintax highlighting), and , as I said, [Turbo Editor](https://github.com/magiblot/turbo) for the already implemented multi document editor funcitonality and sintax highlighting.
