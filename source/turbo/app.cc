@@ -304,7 +304,7 @@ void TurboApp::handleEvent(TEvent &event)
 				NewBasicCProject();
 				break;
 			case cmNewBasicGLFWCProject:
-				NewBasicCProject();
+				NewBasicGLFWCProject();
 				break;
 			case cmBuild:
 				BuildOutput::show(*deskTop, ".", event.message.command);

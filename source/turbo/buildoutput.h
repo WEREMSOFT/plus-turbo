@@ -118,18 +118,21 @@ void BuildOutput::show(TGroup &owner, const char *workingDir, short command) noe
 
 	TWindow* window;
 	TScrollBar *scrollBar;
+	TScrollBar *hScrollBar;
 	TTerminal* interior;
 	std::ostream *out;
 
 	window = new TWindow(owner.getExtent().grow(-1, -1), "Build & Run", 0);
-	window->palette = wpGrayWindow;
+	// window->palette = wpGrayWindow;
 
 	scrollBar = window->standardScrollBar(sbVertical | sbHandleKeyboard);
-
+	hScrollBar = window->standardScrollBar(sbHorizontal | sbHandleKeyboard);
+	
 	interior = new TTerminal( window->getExtent().grow(-1, -1),
-                              0,
+							  hScrollBar,	
                               scrollBar,
                               0x0F00);
+
     window->insert(interior);
 	out = new std::ostream(interior);
 	owner.insert(window);
