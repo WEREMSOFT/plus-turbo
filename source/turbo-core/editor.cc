@@ -29,7 +29,7 @@ Editor::Editor(TScintilla &aScintilla) noexcept :
     call(scintilla, SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
 
     // Indentation
-    call(scintilla, SCI_SETUSETABS, false, 0U);
+    call(scintilla, SCI_SETUSETABS, true, 0U);
     call(scintilla, SCI_SETINDENT, 4, 0U);
     call(scintilla, SCI_SETTABWIDTH, 4, 0U);
     call(scintilla, SCI_SETTABINDENTS, true, 0U);
