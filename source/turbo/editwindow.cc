@@ -190,7 +190,6 @@ std::string EditorWindow::getWordUnderCursor()
     auto start = editor.callScintilla(SCI_WORDSTARTPOSITION, pos, true);
     auto end = editor.callScintilla( SCI_WORDENDPOSITION, pos, true);
     return turbo::getRangePointer(editor.scintilla, start, end);
-	// return "printf";
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)

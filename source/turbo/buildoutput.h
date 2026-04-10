@@ -3,6 +3,7 @@
 
 #define Uses_TTerminal
 #include <tvision/tv.h>
+#include "process.h"
 
 class BuildOutput
 {

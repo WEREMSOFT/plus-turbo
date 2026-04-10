@@ -14,13 +14,12 @@
 #include <array>
 #include "editwindow.h"
 static constexpr TStringView aboutDialogText =
-    "\003Turbo"
+    "\003+Turbo"
 #ifdef TURBO_VERSION_STRING
     " (build " TURBO_VERSION_STRING ")"
 #endif
     "\n\n"
-    "\003A text editor based on Scintilla and Turbo Vision\n\n"
-    "\003https://github.com/magiblot/turbo";
+    "\003A text editor based on Turbo, Scintilla and Turbo Vision\n\n";
 
 // Since we do not need cross-references, we can easily create a THelpFile
 // on-the-fly and define topics manually instead of using TVHC.
@@ -29,7 +28,7 @@ static constexpr TStringView helpParagraphs[] =
 {
     "  Keyboard shortcuts ▄\n"
     " ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀",
-    "This table shows Turbo's commands and their associated keyboard shortcuts."
+    "This table shows +Turbo's commands and their associated keyboard shortcuts."
     "\n\n",
     "Some commands can be triggered by more than one shortcut. Some keyboard "
     "shortcuts may not be supported by the console.\n\n",
@@ -181,42 +180,65 @@ void TurboHelp::showOrFocusHelpWindow(TGroup &owner, char* selectedText) noexcep
 
     if (helpWindow == 0)
     {
-		char cmd[100] = {0};
-		FILE* pipe = nullptr;
+        std::string result;
+        bool found = false;
 
-		if(selectedText != nullptr && strlen(selectedText) != 0)
-		{
-			snprintf(cmd, 100, "man 3 %s", selectedText);
-			pipe = popen(cmd, "r");
-		}
+        // Try sections 3, 2, and then no section
+        if (selectedText != nullptr && strlen(selectedText) != 0)
+        {
+            const char* sections[] = {"3", "2", ""};
+            for (const char* section : sections)
+            {
+                char cmd[128] = {0};
+                if (strlen(section) > 0)
+                    snprintf(cmd, sizeof(cmd), "man %s %s 2>/dev/null", section, selectedText);
+                else
+                    snprintf(cmd, sizeof(cmd), "man %s 2>/dev/null", selectedText);
 
-		std::array<char, 256> manPage;
-		std::string result;
+                FILE* pipe = popen(cmd, "r");
+                if (pipe)
+                {
+                    std::array<char, 256> manPage;
+                    std::string output;
+                    while (fgets(manPage.data(), manPage.size(), pipe) != nullptr)
+                    {
+                        output += manPage.data();
+                    }
+                    pclose(pipe);
 
-		if(!pipe || strlen(selectedText) == 0)
-		{
-			for (const auto &p : helpParagraphs)
-			{
-				result += p.data();
-			}
-		} else {
-			while(fgets(manPage.data(), manPage.size(), pipe) != nullptr)
-			{
-				result += manPage.data();
-			}
+                    // Check if we actually got output (man page found)
+                    if (!output.empty())
+                    {
+                        result = std::move(output);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
 
-			if(result.size() == 0)
-			{
-				result += "No man page found for \"";
-				result +=  selectedText;
-				result += "\"";
-			}
-		}
+        // Fallback logic
+        if (!found)
+        {
+            // If no text was selected, show general help
+            if (selectedText == nullptr || strlen(selectedText) == 0)
+            {
+                for (const auto &p : helpParagraphs)
+                {
+                    result += p.data();
+                }
+            }
+            else
+            {
+                // If text was selected but no man page was found in any section
+                result = "No man page found for \"";
+                result += selectedText;
+                result += "\"";
+            }
+        }
 
-
-		TStringView sv{result.data(), result.size()};
-
-		THelpFile &helpFile = createInMemoryHelpFile(TSpan<const TStringView>(&sv, 1));
+        TStringView sv{result.data(), result.size()};
+        THelpFile &helpFile = createInMemoryHelpFile(TSpan<const TStringView>(&sv, 1));
 
         helpWindow = new TurboHelpWindow(helpFile);
 

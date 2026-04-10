@@ -30,6 +30,7 @@
 #include "doctree.h"
 #include "foldertree.h"
 #include "projectcreator.h"
+#include "process.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 #include <variant>
