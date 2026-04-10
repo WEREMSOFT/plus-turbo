@@ -1,5 +1,6 @@
 
-<img width="320" height="240" alt="Sprite-0002" src="https://github.com/user-attachments/assets/7812559b-6882-45ee-bd8b-7a05c2543ac5" />
+<img width="174" height="201" alt="image" src="https://github.com/user-attachments/assets/71fc31a8-e001-4c0e-bee5-d7859c361d70" />
+
 
 
 # +Turbo IDE
