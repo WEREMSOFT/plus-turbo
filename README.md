@@ -1,6 +1,5 @@
 
-<img width="174" height="201" alt="image" src="https://github.com/user-attachments/assets/71fc31a8-e001-4c0e-bee5-d7859c361d70" />
-
+![PLUSTURB](https://github.com/user-attachments/assets/53164835-0415-4921-b471-4be50ad76ec0)
 
 
 # +Turbo IDE
