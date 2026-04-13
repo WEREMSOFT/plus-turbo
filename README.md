@@ -16,8 +16,8 @@ It adds the following functionality that I wanted for myself:
 - [x] Default color scheme matching the old Borland Turbo C++.
 - [x] File browser shows the contents of the current folder. Not only the open files.
 - [ ] Integration with GDB.
-- [ ] Integration with (and only with)Makefiles. Including saving project preferences in special comments.
-- [ ] Project templates, allows to create C projects that uses Opengl, SDL3 or GLFW and compiles to binary or to a browser using emscripten.
+- [x] Integration with (and only with)Makefiles. Including saving project preferences in special comments.
+- [x] Project templates, allows to create C projects that uses Opengl, SDL3 or GLFW and compiles to binary or to a browser using emscripten.
 - [ ] Installing libraries needed for the project templates.
 
 # But why?
