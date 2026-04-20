@@ -287,23 +287,41 @@ void TurboApp::idle()
 				char line[4096];
 				while (process_getline(&BuildOutput::runningProcess, line, sizeof(line)))
 				{
-					if (line[0] == '~' || line[0] == '&')
+					char c = line[0];
+					if (c == '@')
 					{
-						(*BuildOutput::out) << mi_unquote(line + 1);
-						BuildOutput::out->flush();
-					}
-					else if (line[0] == '@')
-					{
+						// Target stream output
 						if (BuildOutput::progOut)
 						{
 							(*BuildOutput::progOut) << mi_unquote(line + 1);
 							BuildOutput::progOut->flush();
 						}
 					}
+					else if (c == '~' || c == '&')
+					{
+						// Console or Log stream output
+						(*BuildOutput::out) << mi_unquote(line + 1);
+						BuildOutput::out->flush();
+					}
+					else if (c == '^' || c == '*' || c == '+' || c == '=')
+					{
+						// MI Result or Notification records
+						(*BuildOutput::out) << line;
+						BuildOutput::out->flush();
+					}
 					else
 					{
-						(*BuildOutput::out) << line << "\n";
-						BuildOutput::out->flush();
+						// Likely raw program output (not wrapped by GDB)
+						if (BuildOutput::progOut)
+						{
+							(*BuildOutput::progOut) << line;
+							BuildOutput::progOut->flush();
+						}
+						else
+						{
+							(*BuildOutput::out) << line;
+							BuildOutput::out->flush();
+						}
 					}
 				}
 			}
