@@ -3,6 +3,7 @@
 
 #define Uses_TTerminal
 #include <tvision/tv.h>
+#include <vector>
 #include "process.h"
 #include "cmds.h"
 
@@ -11,6 +12,7 @@ class BuildOutput
 public:
 	static std::ostream *out;
 	static process_t runningProcess;
+	static std::vector<std::string> breakpoints;
 	static process_t runRunAsync();
 	static process_t runBuildAsync();
 	static process_t runDebugAsync();
@@ -34,9 +36,12 @@ public:
 #include <array>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 std::ostream* BuildOutput::out = nullptr;
 process_t BuildOutput::runningProcess = {};
+std::vector<std::string> BuildOutput::breakpoints;
 
 process_t BuildOutput::runRunAsync()
 {
@@ -55,6 +60,10 @@ process_t BuildOutput::runBuildAsync()
 process_t BuildOutput::runDebugAsync()
 {
 	process_t p = process_start("./bin/main.bin", NULL);
+	for (const auto& bp : breakpoints)
+	{
+		process_break(&p, bp.c_str());
+	}
 	process_run(&p);
 	return p;
 }
@@ -77,30 +86,6 @@ static std::string runMake(const char *workingDir)
     std::string cmd = "cd \"";
     cmd += workingDir;
     cmd += "\" && make build 2>&1";
-
-    FILE *pipe = popen(cmd.c_str(), "r");
-    if (!pipe)
-        return "Failed to run make.\n";
-
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
-        result += buffer.data();
-
-    pclose(pipe);
-
-    if (result.empty())
-        result = "Build finished with no output.\n";
-
-    return result;
-}
-
-static std::string runRun(const char *workingDir)
-{
-    std::array<char, 256> buffer;
-    std::string result;
-
-    std::string cmd = "cd \"";
-    cmd += workingDir;
-    cmd += "\" && make run_main 2>&1";
 
     FILE *pipe = popen(cmd.c_str(), "r");
     if (!pipe)

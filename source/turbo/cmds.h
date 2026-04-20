@@ -29,6 +29,7 @@ enum : ushort
     cmStepInto,
     cmStepOver,
     cmStop,
+    cmToggleBreakpoint,
     // Commands that cannot be disabled.
     cmToggleTree = 1000,
     cmToggleFolderTree,

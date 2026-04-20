@@ -180,6 +180,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 			*new TMenuItem( "~S~tep into", cmStepInto, kbF7, hcNoContext, "F7" ) +
 			*new TMenuItem( "Step ~O~ver", cmStepOver, kbF8, hcNoContext, "F8" ) +
 			*new TMenuItem( "Sto~p~", cmStop, kbShiftF5, hcNoContext, "Shift-F5" ) +
+			*new TMenuItem( "Toggle ~B~reakpoint", cmToggleBreakpoint, kbF9, hcNoContext, "F9" ) +
         *new TSubMenu( "~W~indows", kbAltW ) +
 			*new TMenuItem( "~Z~oom", cmZoom, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
@@ -192,7 +193,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 	        *new TMenuItem( "C~a~scade", cmCascade, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +
             *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
+            *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~F~older Tree View", cmToggleFolderTree, kbNoKey, hcNoContext ) +
@@ -344,6 +345,34 @@ void TurboApp::handleEvent(TEvent &event)
 				break;
 			case cmStop:
 				process_kill(&BuildOutput::runningProcess);
+				break;
+			case cmToggleBreakpoint:
+				if (!MRUlist.empty())
+				{
+					auto &edWin = *MRUlist.next->self;
+					auto &ed = edWin.getEditor();
+					auto pos = ed.callScintilla(SCI_GETCURRENTPOS, 0, 0);
+					auto line = ed.callScintilla(SCI_LINEFROMPOSITION, pos, 0);
+					char loc[MAX_PATH];
+					snprintf(loc, sizeof(loc), "%s:%ld", edWin.filePath().c_str(), line + 1);
+					
+					std::string sloc = loc;
+					auto it = std::find(BuildOutput::breakpoints.begin(), BuildOutput::breakpoints.end(), sloc);
+					if (it != BuildOutput::breakpoints.end())
+					{
+						BuildOutput::breakpoints.erase(it);
+						// Note: GDB MI doesn't have a simple -break-delete by location string, 
+						// usually needs ID. For now we just remove from our list for next run.
+					}
+					else
+					{
+						BuildOutput::breakpoints.push_back(sloc);
+						if (process_is_running(&BuildOutput::runningProcess))
+						{
+							process_break(&BuildOutput::runningProcess, loc);
+						}
+					}
+				}
 				break;
             default:
                 handled = false;
