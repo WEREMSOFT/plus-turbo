@@ -38,24 +38,24 @@ process_t BuildOutput::runningProcess = {};
 
 process_t BuildOutput::runRunAsync()
 {
-	process_t p = process_start("/bin/sh", "-c", "cd . && make run_main 2>&1", NULL);
+	process_t p = process_start("cd . && make run_main 2>&1", NULL);
 	return p;
 }
 
 process_t BuildOutput::runBuildAsync()
 {
-	process_t p = process_start("/bin/sh", "-c", "cd . && make build 2>&1", NULL);
+	process_t p = process_start("make build 2>&1", NULL);
 	return p;
 }
 
 int BuildOutput::getProcessOutput(process_t p, char *buffer, size_t buffer_size)
 {
-	return process_poll_output(p, buffer, sizeof(buffer));
+	return process_poll_output(&p, buffer, sizeof(buffer));
 }
 
 void BuildOutput::processKill(process_t p)
 {
-	process_kill(p);
+	process_kill(&p);
 }
 
 static std::string runMake(const char *workingDir)

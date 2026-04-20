@@ -247,10 +247,10 @@ void TurboApp::idle()
 
 	if(BuildOutput::out != nullptr)
 	{
-		if(process_is_running(BuildOutput::runningProcess))
+		if(process_is_running(&BuildOutput::runningProcess))
 		{
 			char buffer[MAX_PATH];
-			int n = process_poll_output(BuildOutput::runningProcess, buffer, sizeof(buffer));
+			int n = process_poll_output(&BuildOutput::runningProcess, buffer, sizeof(buffer));
 			if(n > 0)
 				(*BuildOutput::out) << buffer;
 		}
