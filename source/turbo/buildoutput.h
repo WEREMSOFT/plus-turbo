@@ -17,6 +17,7 @@ public:
 	static std::vector<std::string> breakpoints;
 	static process_t runRunAsync();
 	static process_t runBuildAsync();
+	static process_t runCleanAsync();
 	static process_t runDebugAsync();
 	static int getProcessOutput(process_t p, char *buffer, size_t buffer_size);
 	static void processKill(process_t p);
@@ -57,6 +58,13 @@ process_t BuildOutput::runRunAsync()
 process_t BuildOutput::runBuildAsync()
 {
 	char *args[] = {(char*)"sh", (char*)"-c", (char*)"make build 2>&1", NULL};
+	process_t p = process_start("sh", args);
+	return p;
+}
+
+process_t BuildOutput::runCleanAsync()
+{
+	char *args[] = {(char*)"sh", (char*)"-c", (char*)"make clean 2>&1", NULL};
 	process_t p = process_start("sh", args);
 	return p;
 }
@@ -144,11 +152,10 @@ void BuildOutput::show(TGroup &owner, const char *workingDir, short command) noe
 			BuildOutput::runningProcess = runRunAsync();
 			break;
 		case cmBuild:
-		 	output = runMake(workingDir);
-			// BuildOutput::runningProcess = runBuildAsync();
+			BuildOutput::runningProcess = runBuildAsync();
 			break;
 		case cmClean:
-		 	output = runClean(workingDir);
+			BuildOutput::runningProcess = runCleanAsync();
 			break;
 		case cmDebug:
 			isDebugging = true;
