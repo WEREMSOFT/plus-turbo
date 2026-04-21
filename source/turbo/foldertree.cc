@@ -321,6 +321,11 @@ void FolderTreeView::loadFromFolder(const std::string &path) noexcept
 
     for (const auto &entry : fs::recursive_directory_iterator(path))
     {
+        // Skip .git directories
+        if (entry.path().string().find("/.git") != std::string::npos || 
+            entry.path().string().find("\\.git") != std::string::npos)
+            continue;
+
         addFileNode(entry.path().string());
     }
 
@@ -336,6 +341,11 @@ void FolderTreeView::loadRecursive(const std::string &path) noexcept
     {
         const auto &p = entry.path();
         auto pathString = p.string();
+
+        // Skip .git directories
+        if (pathString.find("/.git") != std::string::npos || 
+            pathString.find("\\.git") != std::string::npos)
+            continue;
 
         // Add node (this already creates parent directories via getDirNode)
         addFileNode(pathString);
