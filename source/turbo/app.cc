@@ -34,6 +34,7 @@
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 #include <variant>
+#include <vector>
 
 using namespace Scintilla;
 namespace fs = std::filesystem;
@@ -475,18 +476,34 @@ void TurboApp::parseArgs()
         auto *current = new TParamText(TRect(2, 3, 48, 9));
         w->insert(current);
         insert(w);
+
+        std::string dirToLoad = "";
+        std::vector<std::string> filesToOpen;
+
         for (int i = 1; i < argc; ++i) {
-            current->setText("%s", argv[i]);
-            TScreen::flushScreen();
-			
-			if(fs::is_directory(argv[i]))
-			{
-				chdir(argv[i]);
-				folderTree->tree->loadFromFolder(argv[i]);
-			} else {
-				fileOpenOrNew(argv[i]);
-			}
+            if (fs::is_directory(argv[i])) {
+                if (dirToLoad.empty())
+                    dirToLoad = fs::absolute(argv[i]).string();
+            } else {
+                filesToOpen.push_back(fs::absolute(argv[i]).string());
+            }
         }
+
+        if (dirToLoad.empty()) {
+            dirToLoad = fs::current_path().string();
+        }
+
+        current->setText("%s", dirToLoad.c_str());
+        TScreen::flushScreen();
+        chdir(dirToLoad.c_str());
+        folderTree->tree->loadFromFolder(dirToLoad);
+
+        for (const auto& file : filesToOpen) {
+            current->setText("%s", file.c_str());
+            TScreen::flushScreen();
+            fileOpenOrNew(file.c_str());
+        }
+
         remove(w);
         TObject::destroy(w);
     }
