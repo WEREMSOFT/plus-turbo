@@ -131,6 +131,8 @@ $(TARGET): $(OBJS)
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
+build: all copy_assets
+
 # Other targets
 run_main: all copy_assets
 	$(TARGET)
@@ -251,6 +253,8 @@ TARGET := bin/main.bin
 
 # Phony targets
 .PHONY: all run_main clean deep_clean copy_assets web statistics
+
+build: all copy_assets
 
 # Default target
 all: $(TARGET)
