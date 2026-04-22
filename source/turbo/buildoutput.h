@@ -94,54 +94,6 @@ void BuildOutput::processKill(process_t p)
 	process_kill(&p);
 }
 
-static std::string runMake(const char *workingDir)
-{
-    std::array<char, 256> buffer;
-    std::string result;
-
-    std::string cmd = "cd \"";
-    cmd += workingDir;
-    cmd += "\" && make build 2>&1";
-
-    FILE *pipe = popen(cmd.c_str(), "r");
-    if (!pipe)
-        return "Failed to run make.\n";
-
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
-        result += buffer.data();
-
-    pclose(pipe);
-
-    if (result.empty())
-        result = "Build finished with no output.\n";
-
-    return result;
-}
-
-static std::string runClean(const char *workingDir)
-{
-    std::array<char, 256> buffer;
-    std::string result;
-
-    std::string cmd = "cd \"";
-    cmd += workingDir;
-    cmd += "\" && make clean 2>&1";
-
-    FILE *pipe = popen(cmd.c_str(), "r");
-    if (!pipe)
-        return "Failed to run make.\n";
-
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
-        result += buffer.data();
-
-    pclose(pipe);
-
-    if (result.empty())
-        result = "Build finished with no output.\n";
-
-    return result;
-}
-
 void BuildOutput::show(TGroup &owner, const char *workingDir, short command) noexcept
 {
 
