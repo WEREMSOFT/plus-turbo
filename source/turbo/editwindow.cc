@@ -71,8 +71,14 @@ void EditorWindow::handleEvent(TEvent &ev)
             switch (ev.keyDown.keyCode)
             {
                 case kbEsc:
-                    if ((handled = bottomView))
+                    if (bottomView)
                         closeBottomView();
+                    else
+                    {
+                        ev.what = evCommand;
+                        ev.message.command = cmClose;
+                        handled = false;
+                    }
                     break;
                 default:
                     handled = false;

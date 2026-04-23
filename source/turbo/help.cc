@@ -148,7 +148,14 @@ void TurboHelpWindow::handleEvent(TEvent &ev)
 {
     THelpWindow::handleEvent(ev);
 
-    if (ev.what == evBroadcast && ev.message.command == cmFindHelpWindow)
+    if (ev.what == evKeyDown && ev.keyDown.keyCode == kbEsc)
+    {
+        ev.what = evCommand;
+        ev.message.command = cmClose;
+        putEvent(ev);
+        clearEvent(ev);
+    }
+    else if (ev.what == evBroadcast && ev.message.command == cmFindHelpWindow)
         clearEvent(ev);
 }
 
@@ -241,21 +248,8 @@ void TurboHelp::showOrFocusHelpWindow(TGroup &owner, char* selectedText) noexcep
         THelpFile &helpFile = createInMemoryHelpFile(TSpan<const TStringView>(&sv, 1));
 
         helpWindow = new TurboHelpWindow(helpFile);
-
-        // Resize the Help Window so that:
-        // - It fits into the owner view.
-        // - It is wide enough for the topic contents to fit, if possible.
-        THelpViewer *helpViewer = (THelpViewer *) helpWindow->first();
-        THelpTopic *topic = helpViewer->topic;
-        int topicWidth = max(helpViewer->size.x, topic->longestLineWidth());
-        int marginWidth = helpWindow->size.x - helpViewer->size.x;
-        int windowWidth = topicWidth + marginWidth;
-        TRect bounds = owner.getExtent();
-        bounds.b.x = min(bounds.b.x, windowWidth);
-        // THelpWindow has 'ofCentered' set, so it will be centered automatically.
-        helpWindow->changeBounds(bounds);
-
         owner.insert(helpWindow);
+        helpWindow->zoom();
     }
 
     helpWindow->focus();
