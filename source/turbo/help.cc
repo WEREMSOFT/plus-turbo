@@ -6,12 +6,14 @@
 #define Uses_TDialog
 #define Uses_TGroup
 #define Uses_TStaticText
+#define Uses_TInputLine
 #include <tvision/tv.h>
 
 #include "cmds.h"
 #include <sstream>
 
 #include <array>
+#include <cctype>
 #include "editwindow.h"
 static constexpr TStringView aboutDialogText =
     "\003+Turbo"
@@ -113,6 +115,28 @@ void TurboHelp::executeAboutDialog(TGroup &owner) noexcept
     TObject::destroy(aboutBox);
 }
 
+void TurboHelp::executeManPageDialog(TGroup &owner) noexcept
+{
+    TDialog *dialog = new TDialog(TRect(0, 0, 50, 8), "Man Page Search");
+    dialog->options |= ofCentered;
+
+    dialog->insert(new TStaticText(TRect(2, 2, 48, 3), "Enter man page (e.g. 'printf' or '3 printf'):"));
+    TInputLine *input = new TInputLine(TRect(2, 3, 47, 4), 128);
+    dialog->insert(input);
+
+    dialog->insert(new TButton(TRect(27, 5, 37, 7), "OK", cmOK, bfDefault));
+    dialog->insert(new TButton(TRect(38, 5, 48, 7), "Cancel", cmCancel, bfNormal));
+
+    if (owner.execView(dialog) == cmOK)
+    {
+        char buffer[129];
+        input->getData(buffer);
+        if (buffer[0] != '\0')
+            showOrFocusHelpWindow(owner, buffer);
+    }
+    TObject::destroy(dialog);
+}
+
 // Use a stringbuf to store the help file contents. We use inheritance to
 // ensure that the stringbuf's lifetime exceeds that of the THelpFile.
 class InMemoryHelpFile : private std::stringbuf, public THelpFile
@@ -190,35 +214,61 @@ void TurboHelp::showOrFocusHelpWindow(TGroup &owner, char* selectedText) noexcep
         std::string result;
         bool found = false;
 
-        // Try sections 3, 2, and then no section
         if (selectedText != nullptr && strlen(selectedText) != 0)
         {
-            const char* sections[] = {"3", "2", ""};
-            for (const char* section : sections)
+            // If it already looks like a "section page" command, try it as is.
+            std::string text = selectedText;
+            size_t firstChar = text.find_first_not_of(" ");
+            if (firstChar != std::string::npos && isdigit(text[firstChar]))
             {
-                char cmd[128] = {0};
-                if (strlen(section) > 0)
-                    snprintf(cmd, sizeof(cmd), "man %s %s 2>/dev/null", section, selectedText);
-                else
-                    snprintf(cmd, sizeof(cmd), "man %s 2>/dev/null", selectedText);
-
+                char cmd[256] = {0};
+                snprintf(cmd, sizeof(cmd), "man %s 2>/dev/null", selectedText);
                 FILE* pipe = popen(cmd, "r");
                 if (pipe)
                 {
                     std::array<char, 256> manPage;
                     std::string output;
                     while (fgets(manPage.data(), manPage.size(), pipe) != nullptr)
-                    {
                         output += manPage.data();
-                    }
                     pclose(pipe);
-
-                    // Check if we actually got output (man page found)
                     if (!output.empty())
                     {
                         result = std::move(output);
                         found = true;
-                        break;
+                    }
+                }
+            }
+
+            // Try sections 3, 2, and then no section
+            if (!found)
+            {
+                const char* sections[] = {"3", "2", ""};
+                for (const char* section : sections)
+                {
+                    char cmd[256] = {0};
+                    if (strlen(section) > 0)
+                        snprintf(cmd, sizeof(cmd), "man %s %s 2>/dev/null", section, selectedText);
+                    else
+                        snprintf(cmd, sizeof(cmd), "man %s 2>/dev/null", selectedText);
+
+                    FILE* pipe = popen(cmd, "r");
+                    if (pipe)
+                    {
+                        std::array<char, 256> manPage;
+                        std::string output;
+                        while (fgets(manPage.data(), manPage.size(), pipe) != nullptr)
+                        {
+                            output += manPage.data();
+                        }
+                        pclose(pipe);
+
+                        // Check if we actually got output (man page found)
+                        if (!output.empty())
+                        {
+                            result = std::move(output);
+                            found = true;
+                            break;
+                        }
                     }
                 }
             }

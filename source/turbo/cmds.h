@@ -43,6 +43,7 @@ enum : ushort
     cmFindReplaceBox,
     cmClearReplace,
     cmAbout,
+    cmManPage,
     cmFindHelpWindow,
 };
 

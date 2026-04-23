@@ -8,6 +8,7 @@ class TurboHelp
 public:
 
     static void executeAboutDialog(TGroup &owner) noexcept;
+    static void executeManPageDialog(TGroup &owner) noexcept;
     static void showOrFocusHelpWindow(TGroup &owner, char* selectedText) noexcept;
 };
 

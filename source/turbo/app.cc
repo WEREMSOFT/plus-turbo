@@ -200,7 +200,8 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~F~older Tree View", cmToggleFolderTree, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~H~elp", kbAltH ) +
-            *new TMenuItem( "~K~eyboard shortcurs", cmHelp, kbF1, hcNoContext, "F1" ) +
+            *new TMenuItem( "~K~eyboard shortcuts", cmHelp, kbF1, hcNoContext, "F1" ) +
+            *new TMenuItem( "~M~an page...", cmManPage, kbAltF1, hcNoContext, "Alt-F1" ) +
             newLine() +
             *new TMenuItem( "~A~bout...", cmAbout, kbNoKey, hcNoContext )
             );
@@ -422,6 +423,9 @@ void TurboApp::handleEvent(TEvent &event)
                 break;
             case cmAbout:
                 TurboHelp::executeAboutDialog(*deskTop);
+                break;
+            case cmManPage:
+                TurboHelp::executeManPageDialog(*deskTop);
                 break;
             case cmHelp:
                 TurboHelp::showOrFocusHelpWindow(*deskTop, (char*)event.message.infoPtr);
