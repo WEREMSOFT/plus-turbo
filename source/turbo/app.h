@@ -49,6 +49,7 @@ struct TurboApp : public TApplication, EditorWindowParent
 	void NewBasicCProject();
 	void NewBasicSDL3CProject();
 	void NewBasicGLFWCProject();
+	void NewSDLFrameBufferProject();
     TRect newEditorBounds() const;
     turbo::TScintilla &createScintilla() noexcept;
     void addEditor(turbo::TScintilla &, const char *path);

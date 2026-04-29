@@ -45,6 +45,7 @@ enum : ushort
     cmAbout,
     cmManPage,
     cmFindHelpWindow,
+    cmNewSDLFrameBufferProject,
 };
 
 #endif // TURBO_CMDS_H

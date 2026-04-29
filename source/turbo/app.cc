@@ -140,6 +140,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 			*new TMenuItem( "~N~ew Basic C Project", cmNewBasicCProject, kbNoKey, hcNoContext ) +
 			*new TMenuItem( "~N~ew Basic SDL3 C Project", cmNewBasicSDL3CProject, kbNoKey, hcNoContext ) +
 			*new TMenuItem( "~N~ew Basic GLFW C Project", cmNewBasicGLFWCProject, kbNoKey, hcNoContext ) +
+			*new TMenuItem( "~N~ew SDL FrameBuffer Project", cmNewSDLFrameBufferProject, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
@@ -454,6 +455,9 @@ void TurboApp::handleEvent(TEvent &event)
 			case cmNewBasicGLFWCProject:
 				NewBasicGLFWCProject();
 				break;
+			case cmNewSDLFrameBufferProject:
+				NewSDLFrameBufferProject();
+				break;
 			case cmBuild:
 				BuildOutput::show(*deskTop, ".", event.message.command);
 				break;
@@ -582,6 +586,12 @@ void TurboApp::NewBasicSDL3CProject()
 void TurboApp::NewBasicGLFWCProject()
 {
 	ProjectCreator::createGLFW();
+	folderTree->tree->loadFromFolder(fs::current_path());
+}
+
+void TurboApp::NewSDLFrameBufferProject()
+{
+	ProjectCreator::createSDLFrameBuffer();
 	folderTree->tree->loadFromFolder(fs::current_path());
 }
 
