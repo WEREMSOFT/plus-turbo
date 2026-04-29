@@ -188,7 +188,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
             *new TMenuItem( "~N~ext", cmEditorNext, kbCtrlP, hcNoContext, "Ctrl-P" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
-            *new TMenuItem( "~C~lose", cmClose, kbAltF3, hcNoContext, "Alt-F3" ) +
+            *new TMenuItem( "~C~lose", cmClose, kbEsc, hcNoContext, "Esc" ) +
             *new TMenuItem( "Previous (in tree)", cmTreePrev, kbAltUp, hcNoContext, "Alt-Up" ) +
             *new TMenuItem( "Next (in tree)", cmTreeNext, kbAltDown, hcNoContext, "Alt-Down" ) +
 			*new TMenuItem( "~T~ile", cmTile, kbNoKey, hcNoContext ) +
@@ -217,6 +217,7 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl-N~ New", kbNoKey, cmNew ) +
             *new TStatusItem( "~Ctrl-O~ Open", kbNoKey, cmOpen ) +
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
+            *new TStatusItem( "~Esc~ Close", kbEsc, cmClose ) +
             *new TStatusItem( "~Ctrl-P~ Next", kbCtrlP, cmEditorNext ) +
             *new TStatusItem( "~F12~ Menu", kbF12, cmMenu ) +
             *new TStatusItem( 0, TKey(kbCtrlZ, kbShift), cmRedo ) +
