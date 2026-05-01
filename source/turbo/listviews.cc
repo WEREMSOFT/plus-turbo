@@ -306,6 +306,13 @@ std::string EditorListModel::getText(void *item) const noexcept
 FileSearchListModel::FileSearchListModel() noexcept
 {
     namespace fs = std::filesystem;
+    static const std::vector<std::string> textExtensions = {
+        ".cpp", ".h", ".cc", ".c", ".cxx", ".hpp", ".hh",
+        ".txt", ".md", ".cmake", ".yml", ".yaml", ".rc", ".1",
+        ".json", ".sh", ".py", ".rs", ".lua", ".go", ".js", ".ts",
+        ".css", ".html", ".xml", ".ini", ".conf", ".gitignore"
+    };
+
     try
     {
         for (const auto &entry : fs::recursive_directory_iterator(fs::current_path()))
@@ -316,7 +323,23 @@ FileSearchListModel::FileSearchListModel() noexcept
                 if (path.find("/.git") == std::string::npos &&
                     path.find("\\.git") == std::string::npos)
                 {
-                    files.push_back(fs::relative(entry.path(), fs::current_path()).string());
+                    std::string ext = entry.path().extension().string();
+                    for (auto &e : ext) e = std::tolower(e);
+
+                    bool isText = false;
+                    for (const auto &textExt : textExtensions)
+                    {
+                        if (ext == textExt)
+                        {
+                            isText = true;
+                            break;
+                        }
+                    }
+
+                    if (isText)
+                    {
+                        files.push_back(fs::relative(entry.path(), fs::current_path()).string());
+                    }
                 }
             }
         }
