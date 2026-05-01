@@ -1,6 +1,7 @@
 
 ![PLUSTURB](https://github.com/user-attachments/assets/53164835-0415-4921-b471-4be50ad76ec0)
 
+<img width="1861" height="815" alt="image" src="https://github.com/user-attachments/assets/4e88314e-3470-4cd2-975e-0fa3c9a20f1c" />
 
 # +Turbo IDE
 
@@ -15,7 +16,7 @@ It adds the following functionality that I wanted for myself:
 - [x] Remove the Line numbers by default (can be re enabled).
 - [x] Default color scheme matching the old Borland Turbo C++.
 - [x] File browser shows the contents of the current folder. Not only the open files.
-- [ ] Integration with GDB.
+- [x] Integration with GDB.
 - [x] Integration with (and only with)Makefiles. Including saving project preferences in special comments.
 - [x] Project templates, allows to create C projects that uses Opengl, SDL3 or GLFW and compiles to binary or to a browser using emscripten.
 - [ ] Installing libraries needed for the project templates.
