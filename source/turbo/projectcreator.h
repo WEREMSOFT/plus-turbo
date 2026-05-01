@@ -17,6 +17,7 @@ public:
         createDir("bin");
         createDir("build");
         createDir("assets");
+        createDir("docs");
         createDir("src");
 
         // Create files with contents
@@ -32,6 +33,7 @@ public:
         createDir("bin");
         createDir("build");
         createDir("assets");
+        createDir("docs");
         createDir("src");
 
         // Create files with contents
@@ -47,6 +49,7 @@ public:
         createDir("bin");
         createDir("build");
         createDir("assets");
+        createDir("docs");
         createDir("src");
 
         // Create files with contents
@@ -61,6 +64,7 @@ public:
         createDir("bin");
         createDir("build");
         createDir("assets");
+        createDir("docs");
         createDir("src");
         createDir("src/core");
         createDir("src/core/array_t");
@@ -171,6 +175,9 @@ deep_clean: clean
 web:
 	emcc -O2 -g -sSTACK_SIZE=1024000 -sEXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -sEXPORTED_FUNCTIONS=_malloc,_free,_main -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -DWITH_MINIAUDIO=1 -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 --preload-file assets -s MIN_WEBGL_VERSION=2 -gsource-map $(SRC_C)  -o docs/index.html
 
+run_web: web
+	emrun docs/index.html
+
 # Statistics target
 statistics:
 	echo >> metrics.txt
@@ -238,6 +245,9 @@ deep_clean: clean
 web:
 	emcc -O2 -g -sSTACK_SIZE=1024000 -sEXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -sEXPORTED_FUNCTIONS=_malloc,_free,_main -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -DWITH_MINIAUDIO=1 -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 --preload-file assets -s MIN_WEBGL_VERSION=2 -gsource-map $(SRC_C)  -o docs/index.html
 
+run_web: web
+	emrun docs/index.html
+
 # Statistics target
 statistics:
 	echo >> metrics.txt
@@ -303,7 +313,10 @@ deep_clean: clean
 
 # Emscripten build
 web:
-	emcc -O2 -g -sSTACK_SIZE=1024000 -sEXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -sEXPORTED_FUNCTIONS=_malloc,_free,_main -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -DWITH_MINIAUDIO=1 -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 --preload-file assets -s MIN_WEBGL_VERSION=2 -gsource-map $(SRC_C)  -o docs/index.html
+	emcc -O2 -g -sSTACK_SIZE=1024000 -sEXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -sEXPORTED_FUNCTIONS=_malloc,_free,_main -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -DWITH_MINIAUDIO=1 -s USE_SDL=3 -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 --preload-file assets -s MIN_WEBGL_VERSION=2 -gsource-map $(SRC_C)  -o docs/index.html
+
+run_web: web
+	emrun docs/index.html
 
 # Statistics target
 statistics:
@@ -484,7 +497,7 @@ typedef struct
 void urPutPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
         int position = (x + y * UR_SCREEN_WIDTH) % (320 * 240 * sizeof(URColor));
-        ((URColor *)appState.textureData)[position] = (URColor){r, g, b, 0xff};
+        ((URColor *)appState.textureData)[position] = (URColor){r, g, b};
 }
 
 /* This function runs once at startup. */

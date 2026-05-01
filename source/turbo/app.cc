@@ -144,6 +144,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
+            *new TMenuItem( "Quick Open", cmOpenFileSearch, kbCtrlP, hcNoContext, "Ctrl-P" ) +
             *new TMenuItem( "Open Folder", cmOpenFolder, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~R~efresh Folder", cmRefreshFolder, kbAltF5, hcNoContext, "Alt-F5" ) +
             newLine() +
@@ -179,6 +180,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 			*new TMenuItem( "~B~uild", cmBuild, kbF6, hcNoContext, "F6") +
 			*new TMenuItem( "~C~lean", cmClean, kbNoKey, hcNoContext) +
 			*new TMenuItem( "~R~un", cmRun, kbF5, hcNoContext, "F5" ) +
+			*new TMenuItem( "Run ~W~eb", cmRunWeb, kbF5, hcNoContext) +
 			*new TMenuItem( "~D~ebug", cmDebug, kbNoKey, hcNoContext ) +
 			*new TMenuItem( "~S~tep into", cmStepInto, kbF7, hcNoContext, "F7" ) +
 			*new TMenuItem( "Step ~O~ver", cmStepOver, kbF8, hcNoContext, "F8" ) +
@@ -187,7 +189,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~W~indows", kbAltW ) +
 			*new TMenuItem( "~Z~oom", cmZoom, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
-            *new TMenuItem( "~N~ext", cmEditorNext, kbCtrlP, hcNoContext, "Ctrl-P" ) +
+            *new TMenuItem( "~N~ext", cmEditorNext, kbCtrlF6, hcNoContext, "Ctrl-F6" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
             *new TMenuItem( "~C~lose", cmClose, kbEsc, hcNoContext, "Esc" ) +
             *new TMenuItem( "Previous (in tree)", cmTreePrev, kbAltUp, hcNoContext, "Alt-Up" ) +
@@ -217,9 +219,10 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( 0, kbAltX, cmQuit ) +
             *new TStatusItem( "~Ctrl-N~ New", kbNoKey, cmNew ) +
             *new TStatusItem( "~Ctrl-O~ Open", kbNoKey, cmOpen ) +
+            *new TStatusItem( "~Ctrl-P~ Quick Open", kbCtrlP, cmOpenFileSearch ) +
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~Esc~ Close", kbEsc, cmClose ) +
-            *new TStatusItem( "~Ctrl-P~ Next", kbCtrlP, cmEditorNext ) +
+            *new TStatusItem( "~Ctrl-F6~ Next", kbCtrlF6, cmEditorNext ) +
             *new TStatusItem( "~F12~ Menu", kbF12, cmMenu ) +
             *new TStatusItem( 0, TKey(kbCtrlZ, kbShift), cmRedo ) +
             *new TStatusItem( 0, kbCtrlX, cmCut ) +
@@ -228,11 +231,7 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( 0, kbShiftDel, cmCut ) +
             *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
             *new TStatusItem( 0, kbShiftIns, cmPaste ) +
-            *new TStatusItem( 0, kbCtrlTab, cmEditorNext ) +
-            *new TStatusItem( 0, kbAltTab, cmEditorNext ) +
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev ) +
-            *new TStatusItem( 0, TKey(kbCtrlTab, kbShift), cmEditorPrev ) +
-            *new TStatusItem( 0, TKey(kbAltTab, kbShift), cmEditorPrev ) +
             *new TStatusItem( 0, TKey('/', kbCtrlShift), cmToggleComment ) +
             *new TStatusItem( 0, TKey('_', kbCtrlShift), cmToggleComment ) +
             // *new TStatusItem( 0, kbF5, cmZoom ) +
@@ -404,7 +403,9 @@ void TurboApp::handleEvent(TEvent &event)
         switch (event.message.command) {
             case cmNew: fileNew(); break;
             case cmOpen: fileOpen(); break;
-			case cmOpenFolder: folderOpen(); break;
+            case cmOpenFileSearch: fileSearch(); break;
+            case cmOpenFolder: folderOpen(); break;
+
             case cmEditorNext:
             case cmEditorPrev:
                 showEditorList(&event);
@@ -465,6 +466,9 @@ void TurboApp::handleEvent(TEvent &event)
 				BuildOutput::show(*deskTop, ".", event.message.command);
 				break;
 			case cmRun:
+				BuildOutput::show(*deskTop, ".", event.message.command);
+				break;
+			case cmRunWeb:
 				BuildOutput::show(*deskTop, ".", event.message.command);
 				break;
 			case cmDebug:
@@ -743,6 +747,24 @@ void TurboApp::showEditorList(TEvent *ev)
     if (deskTop->execView(lw) == cmOK)
         if (auto *wnd = (EditorWindow *) lw->getCurrent())
             wnd->focus();
+
+    destroy(lw);
+}
+
+void TurboApp::fileSearch()
+{
+    FileSearchListModel model;
+    TRect r {0, 0, 0, 0};
+    r.b.x = min(max(ListModel::maxItemCStrLen(model) + 4, 40), deskTop->size.x - 10);
+    r.b.y = min(max(model.size() + 2, 6), deskTop->size.y - 4);
+    r.move((deskTop->size.x - r.b.x) / 2,
+           (deskTop->size.y - r.b.y) / 4);
+    ListWindow *lw = &ListWindow::create(r, "Quick Open", model, lvScrollBars);
+    if (deskTop->execView(lw) == cmOK)
+    {
+        if (auto *path = (std::string *) lw->getCurrent())
+            fileOpenOrNew(path->c_str());
+    }
 
     destroy(lw);
 }

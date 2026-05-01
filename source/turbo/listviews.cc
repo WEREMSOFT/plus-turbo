@@ -5,6 +5,8 @@
 
 #include "listviews.h"
 #include <turbo/tpath.h>
+#include <filesystem>
+#include <vector>
 
 /////////////////////////////////////////////////////////////////////////
 // ListModel
@@ -296,4 +298,47 @@ std::string EditorListModel::getText(void *item) const noexcept
         }
     }
     return text;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// FileSearchListModel
+
+FileSearchListModel::FileSearchListModel() noexcept
+{
+    namespace fs = std::filesystem;
+    try
+    {
+        for (const auto &entry : fs::recursive_directory_iterator(fs::current_path()))
+        {
+            if (entry.is_regular_file())
+            {
+                std::string path = entry.path().string();
+                if (path.find("/.git") == std::string::npos &&
+                    path.find("\\.git") == std::string::npos)
+                {
+                    files.push_back(fs::relative(entry.path(), fs::current_path()).string());
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+    }
+}
+
+size_t FileSearchListModel::size() const noexcept
+{
+    return files.size();
+}
+
+void *FileSearchListModel::at(size_t i) const noexcept
+{
+    return (i < files.size()) ? (void *) &files[i] : nullptr;
+}
+
+std::string FileSearchListModel::getText(void *item) const noexcept
+{
+    if (auto *s = (std::string *) item)
+        return *s;
+    return {};
 }

@@ -5,6 +5,8 @@
 #define Uses_TPalette
 #define Uses_TListViewer
 #include <tvision/tv.h>
+#include <vector>
+#include <string>
 
 #include <turbo/funcview.h>
 
@@ -140,6 +142,19 @@ public:
         list(&aList)
     {
     }
+
+    size_t size() const noexcept override;
+    void *at(size_t i) const noexcept override;
+    std::string getText(void *item) const noexcept override;
+};
+
+class FileSearchListModel : public ListModel
+{
+    std::vector<std::string> files;
+
+public:
+
+    FileSearchListModel() noexcept;
 
     size_t size() const noexcept override;
     void *at(size_t i) const noexcept override;

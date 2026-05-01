@@ -55,6 +55,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     void addEditor(turbo::TScintilla &, const char *path);
     void addEditor(turbo::TScintilla &, const char *path, EditorWindow** w);
     void showEditorList(TEvent *ev);
+    void fileSearch();
     void toggleTreeView();
     void toggleFolderView();
 

@@ -64,6 +64,7 @@ const ushort
 	cmBuild					= 42,
 	cmClean					= 43,
 	cmRun					= 44,
+	cmRunWeb				= 45,
 
 //  TView State masks
 
