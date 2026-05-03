@@ -58,6 +58,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     void fileSearch();
     void toggleTreeView();
     void toggleFolderView();
+    void runWeb();
 
     void handleFocus(EditorWindow &w) noexcept override;
     void handleTitleChange(EditorWindow &w) noexcept override;

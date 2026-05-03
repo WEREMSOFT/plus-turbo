@@ -19,6 +19,7 @@
 #define Uses_MsgBox
 #include <tvision/tv.h>
 #include <filesystem>
+#include <cstdlib>
 
 #include "app.h"
 #include "help.h"
@@ -469,7 +470,7 @@ void TurboApp::handleEvent(TEvent &event)
 				BuildOutput::show(*deskTop, ".", event.message.command);
 				break;
 			case cmRunWeb:
-				BuildOutput::show(*deskTop, ".", event.message.command);
+				runWeb();
 				break;
 			case cmDebug:
 				BuildOutput::show(*deskTop, ".", event.message.command);
@@ -841,6 +842,25 @@ void TurboApp::toggleTreeView()
         win->setState(sfExposed, True);
     });
     deskTop->redraw();
+}
+
+void TurboApp::runWeb()
+{
+    const char *command = "make run_web";
+    char buf[1024];
+#ifdef _WIN32
+    snprintf(buf, sizeof(buf), "start cmd /k \"%s\"", command);
+#else
+    snprintf(buf, sizeof(buf),
+             "(x-terminal-emulator -e \"%s\" || "
+             "gnome-terminal -- %s || "
+             "konsole -e %s || "
+             "xfce4-terminal -e \"%s\" || "
+             "xterm -e \"%s\") &",
+             command, command, command, command, command);
+#endif
+    int r = system(buf);
+    (void) r;
 }
 
 void TurboApp::handleFocus(EditorWindow &w) noexcept
