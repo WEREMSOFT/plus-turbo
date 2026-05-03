@@ -31,6 +31,7 @@ enum : ushort
     cmStop,
     cmToggleBreakpoint,
     cmRefreshFolder,
+    cmBuildWeb,
     // Commands that cannot be disabled.
     cmToggleTree = 1000,
     cmToggleFolderTree,

@@ -179,6 +179,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "~C~apitalize", cmSelCapitalize, kbNoKey, hcNoContext ) +
 		*new TSubMenu( "~R~un", kbAltR ) +
 			*new TMenuItem( "~B~uild", cmBuild, kbF6, hcNoContext, "F6") +
+			*new TMenuItem( "Build for ~w~eb", cmBuildWeb, kbNoKey, hcNoContext) +
 			*new TMenuItem( "~C~lean", cmClean, kbNoKey, hcNoContext) +
 			*new TMenuItem( "~R~un", cmRun, kbF5, hcNoContext, "F5" ) +
 			*new TMenuItem( "Run ~W~eb", cmRunWeb, kbF5, hcNoContext) +
@@ -461,6 +462,9 @@ void TurboApp::handleEvent(TEvent &event)
 				NewSDLFrameBufferProject();
 				break;
 			case cmBuild:
+				BuildOutput::show(*deskTop, ".", event.message.command);
+				break;
+			case cmBuildWeb:
 				BuildOutput::show(*deskTop, ".", event.message.command);
 				break;
 			case cmClean:
