@@ -164,6 +164,15 @@ void EditorWindow::handleEvent(TEvent &ev)
                     if ((handled = bottomView && ev.message.infoPtr == bottomView))
                         closeBottomView();
                     break;
+                case cmClose:
+                    if (bottomView)
+                    {
+                        closeBottomView();
+                        handled = true;
+                    }
+                    else
+                        handled = false;
+                    break;
 				case cmHelp:
 					{
 						auto word = getWordUnderCursor();
