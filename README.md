@@ -1,3 +1,6 @@
+## IMPORTANT
+This repositorio is archived. The project will be hosted in [CodeBerg](https://codeberg.org/WEREMSOFT/plus-turbo)
+
 
 ![PLUSTURB](https://github.com/user-attachments/assets/53164835-0415-4921-b471-4be50ad76ec0)
 
